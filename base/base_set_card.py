@@ -46,16 +46,41 @@ finally:
 
 # ----------------------------------------------
 
+# 카드 이름 리스트
+card_name_list = [
+    '신한카드 Deep Dream Platinum+',
+    '신한카드 Deep Oil',
+    '신한카드 봄'
+]
+
+# ----------------------------------------------
+
 # 데이터 세팅 메서드 리스트
 
 # card table세팅 메서드
 def set_card():
-    pass
+    data = []
+    for i in range(len(card_name_list)):
+        data.append({})
+        data[i]['card_type'] = 0 # 카드 유형
+        data[i]['card_name'] = card_name_list[i] # 카드 이름
+
+    df = pd.DataFrame(data)
+    print(data)
+    df.to_sql('card', con=engine, if_exists='append', index=False)
 
 
 # card_history table세팅 메서드
 def set_card_history():
-    pass
+    for i in range(1, 3):
+        df = pd.read_csv(f'user{i}.csv', encoding='cp949') # 읽어올 파일
+        data = []
+        for index, row in df.iterrows():
+            # date = ''.join(row['승인일자'].split('-')) # 날짜 형식 변경
+            data.append({'card_seq' : i, 'payment_category' : row['업종'], 'payment_detail' : row['가맹점명'], 'payment_price' : row['승인금액'], 'payment_date' : row['승인일자']})
+        df_his = pd.DataFrame(data)
+        df_his.to_sql('card_history', con=engine, if_exists='append', index=False)
+        print(df_his)
 
 
 if __name__ == "__main__":
