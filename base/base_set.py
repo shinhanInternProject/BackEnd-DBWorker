@@ -61,6 +61,8 @@ codes = {
     '여행/숙박': '0026',
     '교육/학습': '0026;1063;1062',
 }
+# stock테이블을 위한 데이터
+stock_data = {}
 
 # category_code 저장을 위한 df 생성
 def category_table():
@@ -93,7 +95,7 @@ def set_category_code():
 # stock_category 저장
 def set_stock_category():
     # category_code 조회
-    select_category_query = "select c_code from category_code"
+    select_category_query = "select distinct c_code from category_code"
     result = pd.read_sql_query(select_category_query, engine)
 
     # 업종 코드별 종목 조회
@@ -102,16 +104,62 @@ def set_stock_category():
 
         # 응답 - 업종 코드에 대한 종목코드, 이름
         response = requests.get(indi_url + f'/stock/category/{c_code}')
+
         if response.status_code == 200:
             data = response.json()
-            print(f"c_code: {c_code}")
-            print(data['result'])
+            stock_data[c_code] = []
+            stock_code_list = []
+
+            # 업종별 종목 리스트
+            for jongmok in data['result']:
+                stock_code = jongmok['stbd_code']
+                stock_name = jongmok['stbd_nm']
+                stock_code_list.append({'category_code' : c_code, 'stock_code' : stock_code})
+                stock_data[c_code].append({'stock_code' : stock_code, 'stock_name' : stock_name})
+
+            # 업종 코드에 대한 종목 코드 저장
+            df = pd.DataFrame(stock_code_list)
+            df.to_sql('stock_category', con=engine, if_exists='append', index=False)
+            print(f'{c_code} done')
         else:
             print("error")
-        time.sleep(1)
+
 # stock 정보 저장
+def set_stock():
+    # 방문기록 - 중복 제거용
+    visited = []
+    # 업종 코드 리스트
+    c_list = stock_data.keys()
+    # stock_code = '005930'
+    # response = requests.get(indi_url + f'/stock/info/{stock_code}')
+    # data = response.json()
 
+    # print(data['result'][0]['day_range'])
+    # print(data['result'][0]['market_cap'])
 
+    for c_code in c_list:
+        for i in range(len(stock_data[c_code])):
+            stock_code = stock_data[c_code][i]['stock_code']
+            stock_name = stock_data[c_code][i]['stock_name']
+            # 이미 조회한 종목 코드인 경우 스킵
+            if stock_code in visited:
+                continue
+            else:
+                visited.append(stock_code)
+            temp_stock_info = [{'stock_code' : stock_code, 'stock_name' : stock_name}]
+            response = requests.get(indi_url + f'/stock/info/{stock_code}')
+
+            if response.status_code == 200:
+                data = response.json()
+                print(data)
+                temp_stock_info[0]['day_range'] = data['result'][0]['day_range']
+                temp_stock_info[0]['market_cap'] = data['result'][0]['market_cap']
+                temp_stock_info[0]['update_date'] = today
+                temp_stock_info[0]['y_close'] = data['result'][0]['y_close']
+                df = pd.DataFrame(temp_stock_info)
+                df.to_sql('stock', con=engine, if_exists='append', index=False)
+                print(df)
 if __name__ == "__main__":
-    # set_category_code()
+    set_category_code()
     set_stock_category()
+    set_stock()
