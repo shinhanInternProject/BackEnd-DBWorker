@@ -63,8 +63,10 @@ def set_stock():
             if response.status_code == 200 and data['status'] == 200:
                 print(data)
                 price = data['result'][0]['y_close']
-                query = text("UPDATE stock SET y_close = :price, update_date = :today WHERE stock_code = :stock_code")
-                connection.execute(query, {"price" : price, "stock_code" : stock_code})
+                day_range = data['result'][0]['day_range']
+                market_cap = data['result'][0]['market_cap']
+                query = text("UPDATE stock SET day_range = :day_range, market_cap = :market_cap, y_close = :price, update_date = :update_date WHERE stock_code = :stock_code")
+                connection.execute(query, {"stock_code" : stock_code, "day_range" : day_range, "market_cap" : market_cap, "price" : price, "update_date" : today})
         connection.commit()
 if __name__ == "__main__":
     set_stock()
