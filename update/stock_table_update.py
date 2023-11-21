@@ -19,7 +19,7 @@ db_host = os.getenv('db_host')
 db_port = os.getenv('db_port')
 db_name = os.getenv('db_name')
 
-# 조회를 위한 금일 날짜
+# 업데이트 일정 저장을 위한 금일 날짜
 today = datetime.now().strftime("%Y%m%d")
 
 pymysql.install_as_MySQLdb()
@@ -48,6 +48,7 @@ finally:
 
 # ----------------------------------------------
 
+
 # stock 정보 저장
 def set_stock():
     with engine.connect() as connection:
@@ -68,5 +69,7 @@ def set_stock():
                 query = text("UPDATE stock SET day_range = :day_range, market_cap = :market_cap, y_close = :price, update_date = :update_date WHERE stock_code = :stock_code")
                 connection.execute(query, {"stock_code" : stock_code, "day_range" : day_range, "market_cap" : market_cap, "price" : price, "update_date" : today})
         connection.commit()
+
+
 if __name__ == "__main__":
     set_stock()
