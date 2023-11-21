@@ -77,7 +77,7 @@ def update_card():
 # card_history table세팅 메서드
 def update_card_history():
     # card_seq user_seq없는 값
-    select_card_query = "select card_seq from card where user_seq IS NULL"
+    select_card_query = "select c.card_seq from card c where c.user_seq IS NULL and c.card_seq NOT IN (select distinct card_seq from card_history)";
     card_data = pd.read_sql_query(select_card_query, engine)
 
     for index, row in card_data.iterrows():
@@ -89,11 +89,11 @@ def update_card_history():
         selected_columns = ['payment_category', 'payment_detail', 'payment_price', 'payment_date']
         df_selected = df[selected_columns]
         df_selected['card_seq'] = card_seq
-    #
+
         df_selected.to_sql('card_history', con=engine, if_exists='append', index=False)
         print(card_seq, df_selected)
 
 
 if __name__ == "__main__":
-    # update_card()
+    update_card()
     update_card_history()
