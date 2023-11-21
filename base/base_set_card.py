@@ -74,7 +74,7 @@ def set_card():
 
 # card_history table세팅 메서드
 def set_card_history():
-    for i in range(2, 3):
+    for i in range(1, 3):
         df = pd.read_csv(f'user{i}.csv', encoding='cp949') # 읽어올 파일
         data = []
         for index, row in df.iterrows():
