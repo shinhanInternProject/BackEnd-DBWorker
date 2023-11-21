@@ -79,6 +79,7 @@ def category_table():
 
 # ----------------------------------------------
 
+# db 세팅 메서드 리스트
 
 # category_code 설정 - 초기 1회 -> 이후 실행시 중복 오류
 def set_category_code():
