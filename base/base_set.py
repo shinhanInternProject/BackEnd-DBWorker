@@ -16,9 +16,12 @@ indi_url = os.getenv("indi_api_url")
 # MySQL 연결 정보
 db_username = os.getenv('db_username')
 db_password = os.getenv('db_password')
-db_host = os.getenv('db_host')
-db_port = os.getenv('db_port')
-db_name = os.getenv('db_name')
+# db_host = os.getenv('db_host')
+# db_port = os.getenv('db_port')
+# db_name = os.getenv('db_name')
+db_host = os.getenv('db_host_pub')
+db_port = os.getenv('db_port_pub')
+db_name = os.getenv('db_name_pub')
 
 # 조회를 위한 금일 날짜
 today = datetime.now().strftime("%Y%m%d")
@@ -146,9 +149,9 @@ def set_stock():
                 visited.append(stock_code)
             temp_stock_info = [{'stock_code' : stock_code, 'stock_name' : stock_name}]
             response = requests.get(indi_url + f'/stock/info/{stock_code}')
+            data = response.json()
 
-            if response.status_code == 200:
-                data = response.json()
+            if response.status_code == 200 and data['status'] == 200:
                 print(data)
                 temp_stock_info[0]['day_range'] = data['result'][0]['day_range']
                 temp_stock_info[0]['market_cap'] = data['result'][0]['market_cap']

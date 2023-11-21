@@ -61,11 +61,16 @@ card_name_list = [
 
 # card table세팅 메서드
 def set_card():
+    select_user_query = "select user_seq from user"
+    user_data = pd.read_sql_query(select_user_query, engine)
+
     data = []
-    for i in range(len(card_name_list)):
+    for index, row in user_data.iterrows():
         data.append({})
-        data[i]['card_type'] = 0 # 카드 유형
-        data[i]['card_name'] = card_name_list[i] # 카드 이름
+        card_i = index % 3
+        data[index]['user_seq'] = row['user_seq'] # 유저 구
+        data[index]['card_type'] = 0 # 카드 유형
+        data[index]['card_name'] = card_name_list[card_i] # 카드 이름
 
     df = pd.DataFrame(data)
     print(data)
@@ -74,14 +79,21 @@ def set_card():
 
 # card_history table세팅 메서드
 def set_card_history():
-    for i in range(1, 3):
-        df = pd.read_csv(f'user{i}.csv', encoding='cp949') # 읽어올 파일
-        data = []
-        for index, row in df.iterrows():
-            data.append({'card_seq' : 1, 'payment_category' : row['업종'], 'payment_detail' : row['가맹점명'], 'payment_price' : row['승인금액'], 'payment_date' : row['승인일자']})
-        df_his = pd.DataFrame(data)
-        df_his.to_sql('card_history', con=engine, if_exists='append', index=False)
-        print(df_his)
+    select_card_query = "select card_seq from card"
+    card_data = pd.read_sql_query(select_card_query, engine)
+
+    # 유저 데이터용 - 카드 시퀀스 index가 짝수인경우 1번 데이터, 아닌경우 2번 데이터
+    for index, row in card_data.iterrows():
+        # 내역 데이터 갯수만큼 반복
+        d_id = 1 if index % 2 == 0 else 2
+        df = pd.read_csv(f'user{d_id}.csv', encoding='cp949') # 읽어올 파일 -> 1년치 데이터
+        df = df.rename(columns={'업종': 'payment_category', '가맹점명': 'payment_detail', '승인금액' : 'payment_price', '승인일자' : 'payment_date'})
+        selected_columns = ['payment_category', 'payment_detail', 'payment_price', 'payment_date']
+        df_selected = df[selected_columns]
+        df_selected['card_seq'] = row['card_seq']
+
+        df_selected.to_sql('card_history', con=engine, if_exists='append', index=False)
+        print(df_selected)
 
 
 if __name__ == "__main__":
