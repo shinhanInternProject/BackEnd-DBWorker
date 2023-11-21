@@ -5,8 +5,6 @@ from dotenv import load_dotenv
 from datetime import datetime
 import pymysql
 from sqlalchemy import create_engine
-from tqdm import tqdm
-import time
 from sqlalchemy import text
 
 load_dotenv(verbose=True)
@@ -65,25 +63,8 @@ def set_stock():
             if response.status_code == 200 and data['status'] == 200:
                 print(data)
                 price = data['result'][0]['y_close']
-                # print(price, type(price))
-                query = text("UPDATE stock SET y_close = :price WHERE stock_code = :stock_code")
-                result = connection.execute(query, {"price" : price, "stock_code" : stock_code})
+                query = text("UPDATE stock SET y_close = :price, update_date = :today WHERE stock_code = :stock_code")
+                connection.execute(query, {"price" : price, "stock_code" : stock_code})
         connection.commit()
-
-            # update_query = "update stock set y_close = " + price + " where stock_code = " + stock_code
-            # pd.read_sql(update_query, engine)
-    # add_col_query = "alter table stock add y_close varchar(10) default 0 not null"
-    # df_col = pd.read_sql(add_col_query, engine)
-    # print(df_col)
-    # for stock_code in stock_list:
-    #     for i in range(len(stock_list)):
-    #         response = requests.get(indi_url + f'/stock/curprice/{stock_code}')
-    #
-    #         if response.status_code == 200:
-    #             data = response.json()
-    #             print(data)
-    #             df = pd.DataFrame(temp_stock_info)
-    #             df.to_sql('stock', con=engine, if_exists='append', index=False)
-    #             print(df)
 if __name__ == "__main__":
     set_stock()

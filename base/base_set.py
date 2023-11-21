@@ -1,3 +1,5 @@
+# 기본 db 세팅
+# category_code / stock_category / stock
 import requests
 import os
 import pandas as pd
@@ -5,8 +7,6 @@ from dotenv import load_dotenv
 from datetime import datetime
 import pymysql
 from sqlalchemy import create_engine
-from tqdm import tqdm
-import time
 
 load_dotenv(verbose=True)
 
@@ -64,6 +64,7 @@ codes = {
 # stock테이블을 위한 데이터
 stock_data = {}
 
+
 # category_code 저장을 위한 df 생성
 def category_table():
     data = []
@@ -80,6 +81,7 @@ def category_table():
 # ----------------------------------------------
 
 # db 세팅 메서드 리스트
+
 
 # category_code 설정 - 초기 1회 -> 이후 실행시 중복 오류
 def set_category_code():
@@ -125,18 +127,13 @@ def set_stock_category():
         else:
             print("error")
 
+
 # stock 정보 저장
 def set_stock():
     # 방문기록 - 중복 제거용
     visited = []
     # 업종 코드 리스트
     c_list = stock_data.keys()
-    # stock_code = '005930'
-    # response = requests.get(indi_url + f'/stock/info/{stock_code}')
-    # data = response.json()
-
-    # print(data['result'][0]['day_range'])
-    # print(data['result'][0]['market_cap'])
 
     for c_code in c_list:
         for i in range(len(stock_data[c_code])):
@@ -160,6 +157,8 @@ def set_stock():
                 df = pd.DataFrame(temp_stock_info)
                 df.to_sql('stock', con=engine, if_exists='append', index=False)
                 print(df)
+
+
 if __name__ == "__main__":
     set_category_code()
     set_stock_category()

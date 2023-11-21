@@ -1,6 +1,5 @@
-# 기본 데이터 설정
-# 1. card table data
-# 2. card history table data
+# 기본 db 세팅
+# card / card_history
 
 import requests
 import os
@@ -15,9 +14,12 @@ load_dotenv(verbose=True)
 # MySQL 연결 정보
 db_username = os.getenv('db_username')
 db_password = os.getenv('db_password')
-db_host = os.getenv('db_host')
-db_port = os.getenv('db_port')
-db_name = os.getenv('db_name')
+# db_host = os.getenv('db_host')
+# db_port = os.getenv('db_port')
+# db_name = os.getenv('db_name')
+db_host = os.getenv('db_host_pub')
+db_port = os.getenv('db_port_pub')
+db_name = os.getenv('db_name_pub')
 
 pymysql.install_as_MySQLdb()
 
@@ -72,17 +74,16 @@ def set_card():
 
 # card_history table세팅 메서드
 def set_card_history():
-    for i in range(1, 3):
+    for i in range(2, 3):
         df = pd.read_csv(f'user{i}.csv', encoding='cp949') # 읽어올 파일
         data = []
         for index, row in df.iterrows():
-            # date = ''.join(row['승인일자'].split('-')) # 날짜 형식 변경
-            data.append({'card_seq' : i, 'payment_category' : row['업종'], 'payment_detail' : row['가맹점명'], 'payment_price' : row['승인금액'], 'payment_date' : row['승인일자']})
+            data.append({'card_seq' : 1, 'payment_category' : row['업종'], 'payment_detail' : row['가맹점명'], 'payment_price' : row['승인금액'], 'payment_date' : row['승인일자']})
         df_his = pd.DataFrame(data)
         df_his.to_sql('card_history', con=engine, if_exists='append', index=False)
         print(df_his)
 
 
 if __name__ == "__main__":
-    set_card()
+    # set_card()
     set_card_history()
